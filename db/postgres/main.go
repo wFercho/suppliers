@@ -72,3 +72,8 @@ func (s *PostgresStore) createSuppliersSuppliesTable() error {
 	_, err := s.db.Exec(query)
 	return err
 }
+
+func (s *PostgresStore) buildQuery(params map[string]string) (query string, args []interface{}) {
+
+	return "", nil
+}

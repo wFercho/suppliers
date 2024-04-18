@@ -14,11 +14,11 @@ type SupplierStorage interface {
 	DeleteSupplier(int) error
 	UpdateSupplier(*e.Supplier) (*e.Supplier, error)
 	GetSupplierByID(int) (*e.Supplier, error)
-	// FilterSuppliersByName(string) (*Supplier, error)
-	// GetSuppliersByInputID(int) (*[]Supplier, error)
-	// GetSuppliersByInputName(string) (*[]Supplier, error)
-	// GetSuppliersByProductID(int) (*[]Supplier, error)
-	// GetSuppliersByProductName(string) (*[]Supplier, error)
+	FilterSuppliersByName(string) (*[]e.Supplier, error)
+	// FilterSuppliersBySupplieID(int) (*[]Supplier, error)
+	// FilterSuppliersBySupplieName(string) (*[]Supplier, error)
+	// FilterSuppliersByProductID(int) (*[]Supplier, error)
+	// FilterSuppliersByProductName(string) (*[]Supplier, error)
 }
 
 type SuppliesStorage interface {

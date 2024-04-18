@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/lib/pq"
@@ -158,4 +159,28 @@ func (s *PostgresStore) GetSupplierByID(id int) (*e.Supplier, error) {
 	}
 
 	return &sup, nil
+}
+
+func (s *PostgresStore) FilterSuppliersByName(name string) (*[]e.Supplier, error) {
+
+	containsName := fmt.Sprint("%", strings.ToLower(name), "%")
+	pQuery := fmt.Sprintf("SELECT * FROM supplier WHERE name LIKE '%s'", containsName)
+
+	rows, err := s.db.Query(pQuery)
+
+	if err != nil {
+		return nil, err
+	}
+
+	suppliers := make([]e.Supplier, 0)
+	for rows.Next() {
+		sup := e.Supplier{}
+		err := rows.Scan(&sup.ID, &sup.Name, pq.Array(&sup.Emails), pq.Array(&sup.PhoneNumbers), &sup.CreatedAt, &sup.UpdatedAt)
+		if err != nil {
+			return nil, err
+		}
+		suppliers = append(suppliers, sup)
+	}
+
+	return &suppliers, nil
 }
