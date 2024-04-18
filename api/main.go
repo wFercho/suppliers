@@ -31,6 +31,8 @@ func (s *APIServer) Run() {
 	sMux.HandleFunc("PATCH /supplier", makeHTTPHandleFunc(s.handleUpdateSupplier))
 	sMux.HandleFunc("DELETE /supplier/{id}", makeHTTPHandleFunc(s.handleDeleteSupplier))
 
+	sMux.HandleFunc("GET /supplier", makeHTTPHandleFunc(s.handleFilterSuppliers))
+
 	log.Println("Suppliers API running on port:", s.listenAddr)
 	http.ListenAndServe(s.listenAddr, sMux)
 }

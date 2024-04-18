@@ -89,3 +89,31 @@ func (s *APIServer) handleUpdateSupplier(w http.ResponseWriter, r *http.Request)
 	return WriteJSON(w, http.StatusOK, sup)
 
 }
+
+func (s *APIServer) handleFilterSuppliers(w http.ResponseWriter, r *http.Request) error {
+	qName := r.URL.Query().Get("name")
+	//qSupplieID := r.URL.Query().Get("supplie_id")
+	//qSupplieName := r.URL.Query().Get("supplie_name")
+	// qProductID := r.URL.Query().Get("product_id")
+	// qProductName := r.URL.Query().Get("product_name")
+
+	/*
+		supplier name
+		supplie id
+		supplie name
+		product id
+		product name
+	*/
+
+	if qName != "" {
+		suppliers, err := s.store.FilterSuppliersByName(qName)
+
+		if err != nil {
+			return err
+		}
+
+		return WriteJSON(w, http.StatusOK, suppliers)
+	}
+
+	return nil
+}
