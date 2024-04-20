@@ -24,6 +24,20 @@ type UpdateSupplierRequest struct {
 	PhoneNumbers *[]string `json:"phoneNumbers"`
 }
 
+type CreateSupplieRequest struct {
+	Name string `json:"name"`
+}
+
+type UpdateSupplieRequest struct {
+	Name string `json:"name"`
+}
+
+type CreateSupplierSupplierRequest struct {
+	Name       string `json:"name"`
+	SupplierID int    `json:"supplierId"`
+	SupplieID  int    `json:"supplieId"`
+}
+
 type APIServer struct {
 	listenAddr string
 	store      db.Storage
