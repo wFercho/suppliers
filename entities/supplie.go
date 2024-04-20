@@ -8,3 +8,12 @@ type Supplie struct {
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
 }
+
+func NewSupplie(name string) *Supplie {
+	date := time.Now().UTC()
+	return &Supplie{
+		Name:      name,
+		UpdatedAt: date,
+		CreatedAt: date,
+	}
+}
