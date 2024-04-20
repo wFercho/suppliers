@@ -20,9 +20,15 @@ import (
 // }
 
 func (s *PostgresStore) CreateSupplier(sup *e.Supplier) error {
-	query := `INSERT INTO supplier (name, emails, phone_numbers, created_at, updated_at)
+	query := fmt.Sprintf(`INSERT INTO %s (name, emails, phone_numbers, created_at, updated_at)
 	VALUES ($1, $2, $3, $4, $5)
-	RETURNING id`
+	RETURNING id`, SUPPLIER_TABLE)
+
+	// fmt.Println(queryN)
+
+	// query := `INSERT INTO supplier (name, emails, phone_numbers, created_at, updated_at)
+	// VALUES ($1, $2, $3, $4, $5)
+	// RETURNING id`
 
 	id := 0
 	err := s.db.QueryRow(
@@ -112,7 +118,7 @@ func (s *PostgresStore) UpdateSupplier(sup *e.Supplier) (*e.Supplier, error) {
 		if err != nil {
 			return nil, err
 		}
-		fmt.Printf("%+v\n", supp)
+		//fmt.Printf("%+v\n", supp)
 		return supp, nil
 	}
 
@@ -164,7 +170,7 @@ func (s *PostgresStore) GetSupplierByID(id int) (*e.Supplier, error) {
 func (s *PostgresStore) FilterSuppliersByName(name string) (*[]e.Supplier, error) {
 
 	containsName := fmt.Sprint("%", strings.ToLower(name), "%")
-	pQuery := fmt.Sprintf("SELECT * FROM supplier WHERE name LIKE '%s'", containsName)
+	pQuery := fmt.Sprintf("SELECT * FROM supplier WHERE LOWER(name) LIKE '%s'", containsName)
 
 	rows, err := s.db.Query(pQuery)
 
@@ -183,4 +189,14 @@ func (s *PostgresStore) FilterSuppliersByName(name string) (*[]e.Supplier, error
 	}
 
 	return &suppliers, nil
+}
+
+func (s *PostgresStore) FilterSuppliersBySupplieID(supplieID int) (*[]e.Supplier, error) {
+
+	subQuery := `SELECT supplier_id FROM suppliers_supplies WHERE supplie_id = $1`
+
+	query := fmt.Sprintf("SELECT * FROM supplier JOIN (%s) ON id = supplier_id", subQuery)
+	fmt.Println(query)
+
+	return nil, nil
 }
