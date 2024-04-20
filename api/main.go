@@ -30,8 +30,11 @@ func (s *APIServer) Run() {
 	sMux.HandleFunc("POST /supplier", makeHTTPHandleFunc(s.handleCreateSupplier))
 	sMux.HandleFunc("PATCH /supplier", makeHTTPHandleFunc(s.handleUpdateSupplier))
 	sMux.HandleFunc("DELETE /supplier/{id}", makeHTTPHandleFunc(s.handleDeleteSupplier))
-
 	sMux.HandleFunc("GET /supplier", makeHTTPHandleFunc(s.handleFilterSuppliers))
+
+	sMux.HandleFunc("POST /supplie", makeHTTPHandleFunc(s.handleCreateSupplie))
+
+	sMux.HandleFunc("POST /supplier/supplie", makeHTTPHandleFunc(s.handleAddSupplierSupplie))
 
 	log.Println("Suppliers API running on port:", s.listenAddr)
 	http.ListenAndServe(s.listenAddr, sMux)
