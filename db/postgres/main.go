@@ -66,7 +66,8 @@ func (s *PostgresStore) createSuppliersSuppliesTable() error {
 	query := `CREATE TABLE IF NOT EXISTS suppliers_supplies(
 		id SERIAL PRIMARY KEY,
 		supplier_id INT REFERENCES supplier(id),
-		supplie_id INT REFERENCES supplie(id),	
+		supplie_id INT REFERENCES supplie(id),
+		name VARCHAR(60),
 		created_at TIMESTAMP NOT NULL
 		);`
 	_, err := s.db.Exec(query)
