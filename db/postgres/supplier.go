@@ -10,25 +10,10 @@ import (
 	e "suppliers/entities"
 )
 
-// type supplierPostgres struct {
-// 	id            int
-// 	name          string
-// 	emails        pq.StringArray
-// 	phone_numbers pq.StringArray
-// 	created_at    time.Time
-// 	updated_at    time.Time
-// }
-
 func (s *PostgresStore) CreateSupplier(sup *e.Supplier) error {
 	query := fmt.Sprintf(`INSERT INTO %s (name, emails, phone_numbers, created_at, updated_at)
 	VALUES ($1, $2, $3, $4, $5)
 	RETURNING id`, SUPPLIER_TABLE)
-
-	// fmt.Println(queryN)
-
-	// query := `INSERT INTO supplier (name, emails, phone_numbers, created_at, updated_at)
-	// VALUES ($1, $2, $3, $4, $5)
-	// RETURNING id`
 
 	id := 0
 	err := s.db.QueryRow(
@@ -43,7 +28,6 @@ func (s *PostgresStore) CreateSupplier(sup *e.Supplier) error {
 		return err
 	}
 	sup.ID = id
-	//defer s.db.Close()
 
 	return nil
 }
@@ -56,7 +40,6 @@ func (s *PostgresStore) DeleteSupplier(id int) error {
 	if err != nil {
 		return err
 	}
-	//defer s.db.Close()
 
 	return nil
 }
@@ -118,16 +101,12 @@ func (s *PostgresStore) UpdateSupplier(sup *e.Supplier) (*e.Supplier, error) {
 
 func (s *PostgresStore) GetSupplierByID(id int) (*e.Supplier, error) {
 
-	query := `SELECT * FROM supplier WHERE id = $1`
+	query := fmt.Sprintf("SELECT * FROM %s WHERE id = $1", SUPPLIER_TABLE)
 
 	rows := s.db.QueryRow(query, id)
 
-	//sup := supplierPostgres{}
 	sup := e.Supplier{}
-	//rows.Scan(&sup.id, &sup.name, &sup.emails, &sup.phone_numbers, &sup.created_at, &sup.updated_at)
 	err := rows.Scan(&sup.ID, &sup.Name, pq.Array(&sup.Emails), pq.Array(&sup.PhoneNumbers), &sup.CreatedAt, &sup.UpdatedAt)
-	//fmt.Printf("%+v\n", sup)
-	//defer s.db.Close()
 
 	if err != nil {
 		return nil, err
@@ -139,7 +118,7 @@ func (s *PostgresStore) GetSupplierByID(id int) (*e.Supplier, error) {
 func (s *PostgresStore) FilterSuppliersByName(name string) (*[]e.Supplier, error) {
 
 	containsName := fmt.Sprint("%", strings.ToLower(name), "%")
-	pQuery := fmt.Sprintf("SELECT * FROM supplier WHERE LOWER(name) LIKE '%s'", containsName)
+	pQuery := fmt.Sprintf("SELECT * FROM %s WHERE LOWER(name) LIKE '%s'", SUPPLIER_TABLE, containsName)
 
 	rows, err := s.db.Query(pQuery)
 
@@ -162,9 +141,9 @@ func (s *PostgresStore) FilterSuppliersByName(name string) (*[]e.Supplier, error
 
 func (s *PostgresStore) FilterSuppliersBySupplieID(supplieID int) (*[]e.Supplier, error) {
 
-	subQuery := `SELECT supplier_id FROM suppliers_supplies WHERE supplie_id = $1`
+	subQuery := fmt.Sprintf("SELECT supplier_id FROM %s WHERE supplie_id = $1", SUPPLIER_SUPPLIES_TABLE)
 
-	query := fmt.Sprintf("SELECT * FROM supplier JOIN (%s) ON id = supplier_id", subQuery)
+	query := fmt.Sprintf("SELECT * FROM %s JOIN (%s) ON id = supplier_id", SUPPLIER_TABLE, subQuery)
 	fmt.Println(query)
 
 	return nil, nil
