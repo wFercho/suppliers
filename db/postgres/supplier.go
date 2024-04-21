@@ -49,7 +49,8 @@ func (s *PostgresStore) CreateSupplier(sup *e.Supplier) error {
 }
 
 func (s *PostgresStore) DeleteSupplier(id int) error {
-	query := `DELETE FROM supplier WHERE id = $1;`
+
+	query := fmt.Sprintf("DELETE FROM %s WHERE id = $1", SUPPLIER_TABLE)
 
 	_, err := s.db.Query(query, id)
 	if err != nil {
