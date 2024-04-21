@@ -32,7 +32,7 @@ type UpdateSupplieRequest struct {
 	Name string `json:"name"`
 }
 
-type CreateSupplierSupplierRequest struct {
+type CreateSupplierSupplieRequest struct {
 	Name       string `json:"name"`
 	SupplierID int    `json:"supplierId"`
 	SupplieID  int    `json:"supplieId"`

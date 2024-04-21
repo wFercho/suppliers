@@ -8,7 +8,7 @@ import (
 
 func (s *APIServer) handleAddSupplierSupplie(w http.ResponseWriter, r *http.Request) error {
 
-	createSSrequest := new(CreateSupplierSupplierRequest)
+	createSSrequest := new(CreateSupplierSupplieRequest)
 
 	if err := json.NewDecoder(r.Body).Decode(createSSrequest); err != nil {
 		return err
