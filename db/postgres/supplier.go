@@ -67,85 +67,53 @@ func (s *PostgresStore) UpdateSupplier(sup *e.Supplier) (*e.Supplier, error) {
 	updatePhoneNumbers := sup.PhoneNumbers != nil
 	updateName := len(sup.Name) > 0
 
-	if updateEmail && updatePhoneNumbers && updateName {
-		query := `UPDATE supplier SET name = $1, emails = $2, phone_numbers = $3, updated_at = $4 WHERE id = $5 RETURNING *`
-		rows := s.db.QueryRow(query, sup.Name, pq.Array(sup.Emails), pq.Array(sup.PhoneNumbers), time.Now(), sup.ID)
-		err := rows.Scan(&sup.ID, &sup.Name, pq.Array(&sup.Emails), pq.Array(&sup.PhoneNumbers), &sup.CreatedAt, &sup.UpdatedAt)
-		if err != nil {
-			return nil, err
-		}
+	var fields []string
+	var values []any
+	query := fmt.Sprintf("UPDATE %s SET ", SUPPLIER_TABLE)
 
-		return sup, nil
+	if updateName {
+		fields = append(fields, "name")
+		values = append(values, sup.Name)
 	}
 
-	if updateEmail && updatePhoneNumbers && !updateName {
-		query := `UPDATE supplier SET emails = $1, phone_numbers = $2, updated_at = $3 WHERE id = $4 RETURNING *`
-		rows := s.db.QueryRow(query, pq.Array(sup.Emails), pq.Array(sup.PhoneNumbers), time.Now(), sup.ID)
-		err := rows.Scan(&sup.ID, &sup.Name, pq.Array(&sup.Emails), pq.Array(&sup.PhoneNumbers), &sup.CreatedAt, &sup.UpdatedAt)
-		if err != nil {
-			return nil, err
-		}
-
-		return sup, nil
+	if updateEmail {
+		fields = append(fields, "emails")
+		values = append(values, pq.Array(sup.Emails))
 	}
 
-	if updateEmail && !updatePhoneNumbers && updateName {
-		query := `UPDATE supplier SET name = $1, emails = $2, updated_at = $3 WHERE id = $4 RETURNING *`
-		rows := s.db.QueryRow(query, sup.Name, pq.Array(sup.Emails), time.Now(), sup.ID)
-		err := rows.Scan(&sup.ID, &sup.Name, pq.Array(&sup.Emails), pq.Array(&sup.PhoneNumbers), &sup.CreatedAt, &sup.UpdatedAt)
-		if err != nil {
-			return nil, err
-		}
-
-		return sup, nil
+	if updatePhoneNumbers {
+		fields = append(fields, "phone_numbers")
+		values = append(values, pq.Array(sup.PhoneNumbers))
 	}
 
-	if !updateEmail && updatePhoneNumbers && updateName {
-		query := `UPDATE supplier SET name = $1, phone_numbers = $2, updated_at = $3 WHERE id = $4 RETURNING *`
-		rows := s.db.QueryRow(query, sup.Name, pq.Array(sup.PhoneNumbers), time.Now(), sup.ID)
-		err := rows.Scan(&sup.ID, &sup.Name, pq.Array(&sup.Emails), pq.Array(&sup.PhoneNumbers), &sup.CreatedAt, &sup.UpdatedAt)
-		if err != nil {
-			return nil, err
-		}
+	l := len(fields)
 
-		return sup, nil
+	if l == 0 {
+		return nil, fmt.Errorf("no field specified")
 	}
 
-	if !updateEmail && !updatePhoneNumbers && updateName {
-		query := `UPDATE supplier SET name = $1, updated_at = $2 WHERE id = $3 RETURNING *`
-		rows := s.db.QueryRow(query, sup.Name, time.Now(), sup.ID)
-		supp := &e.Supplier{}
-		err := rows.Scan(&supp.ID, &supp.Name, pq.Array(&supp.Emails), pq.Array(&supp.PhoneNumbers), &supp.CreatedAt, &supp.UpdatedAt)
-		if err != nil {
-			return nil, err
+	fields = append(fields, "updated_at")
+	values = append(values, time.Now())
+
+	for i, field := range fields {
+		query += fmt.Sprintf("%s = $%d", field, i+1)
+		if i < l {
+			query += ", "
 		}
-		//fmt.Printf("%+v\n", supp)
-		return supp, nil
 	}
 
-	if !updateEmail && updatePhoneNumbers && !updateName {
-		query := `UPDATE supplier SET phone_numbers = $1, updated_at = $2 WHERE id = $3 RETURNING *`
-		rows := s.db.QueryRow(query, pq.Array(sup.PhoneNumbers), time.Now(), sup.ID)
-		err := rows.Scan(&sup.ID, &sup.Name, pq.Array(&sup.Emails), pq.Array(&sup.PhoneNumbers), &sup.CreatedAt, &sup.UpdatedAt)
-		if err != nil {
-			return nil, err
-		}
+	query += fmt.Sprintf(" WHERE id = $%d", l+2)
+	values = append(values, sup.ID)
+	query += " RETURNING *"
 
-		return sup, nil
+	rows := s.db.QueryRow(query, values...)
+	err := rows.Scan(&sup.ID, &sup.Name, pq.Array(&sup.Emails), pq.Array(&sup.PhoneNumbers), &sup.CreatedAt, &sup.UpdatedAt)
+	if err != nil {
+		return nil, err
 	}
 
-	if updateEmail && !updatePhoneNumbers && !updateName {
-		query := `UPDATE supplier SET emails = $1 updated_at = $2 WHERE id = $3 RETURNING *`
-		rows := s.db.QueryRow(query, pq.Array(sup.Emails), time.Now(), sup.ID)
-		err := rows.Scan(&sup.ID, &sup.Name, pq.Array(&sup.Emails), pq.Array(&sup.PhoneNumbers), &sup.CreatedAt, &sup.UpdatedAt)
-		if err != nil {
-			return nil, err
-		}
+	return sup, nil
 
-		return sup, nil
-	}
-
-	return nil, fmt.Errorf("no field specified")
 }
 
 func (s *PostgresStore) GetSupplierByID(id int) (*e.Supplier, error) {
